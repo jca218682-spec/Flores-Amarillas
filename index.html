@@ -1,137 +1,657 @@
-#<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Flores animadas</title>
+<title>Flores Amarillas 💛</title>
 
 <style>
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #1d756c;
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
 }
+
+body{
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            #62c9b4 0%,
+            #3aa99c 45%,
+            #23877d 100%
+        );
+
+    font-family:Arial,sans-serif;
+}
+
+
+/* =================================
+   CANVAS
+================================= */
+
+canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+}
+
+
+/* =================================
+   MENSAJE
+================================= */
+
+.mensaje{
+    position:fixed;
+
+    top:35px;
+    left:0;
+
+    width:100%;
+
+    text-align:center;
+
+    z-index:20;
+
+    pointer-events:none;
+
+    padding:0 15px;
+}
+
+.titulo{
+
+    color:#fff8a0;
+
+    font-family:cursive;
+
+    font-size:
+        clamp(28px,7vw,58px);
+
+    font-weight:bold;
+
+    text-shadow:
+        0 2px 3px rgba(0,0,0,.2),
+        0 0 15px rgba(255,255,120,.35);
+}
+
+.subtitulo{
+
+    margin-top:8px;
+
+    color:white;
+
+    font-family:cursive;
+
+    font-size:
+        clamp(17px,4vw,28px);
+
+    text-shadow:
+        0 2px 4px rgba(0,0,0,.2);
+}
+
+
+/* =================================
+   BOTÓN DE INICIO
+================================= */
+
+#inicio{
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:100;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+        linear-gradient(
+            rgba(20,100,90,.82),
+            rgba(20,100,90,.82)
+        );
+
+    transition:
+        opacity .8s ease,
+        visibility .8s ease;
+}
+
+#inicio.oculto{
+
+    opacity:0;
+
+    visibility:hidden;
+
+    pointer-events:none;
+}
+
+
+.boton{
+
+    border:0;
+
+    padding:
+        16px 30px;
+
+    border-radius:50px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff17a,
+            #ffd21c
+        );
+
+    color:#765500;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.25);
+
+    cursor:pointer;
+
+    animation:
+        pulsar 2s infinite;
+}
+
+
+@keyframes pulsar{
+
+    0%,100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.05);
+    }
+
+}
+
+
+/* =================================
+   TEXTO INFERIOR
+================================= */
+
+.abajo{
+
+    position:fixed;
+
+    bottom:20px;
+
+    left:0;
+
+    width:100%;
+
+    text-align:center;
+
+    color:rgba(255,255,255,.85);
+
+    font-size:14px;
+
+    z-index:20;
+
+    pointer-events:none;
+}
+
 </style>
 </head>
 
+
 <body>
 
-<canvas id="flores"></canvas>
+
+<!-- =================================
+     PANTALLA DE INICIO
+================================= -->
+
+<div id="inicio">
+
+    <button
+        class="boton"
+        id="comenzar">
+
+        🌻 Toca para comenzar 🌻
+
+    </button>
+
+</div>
+
+
+<!-- =================================
+     TEXTO
+================================= -->
+
+<div class="mensaje">
+
+    <div class="titulo">
+        Flores Amarillas
+    </div>
+
+    <div class="subtitulo">
+        Un ramo para ti 💛
+    </div>
+
+</div>
+
+
+<canvas id="canvas"></canvas>
+
+
+<div class="abajo">
+    💛 Para alguien especial 💛
+</div>
+
+
+<!-- =================================
+     MÚSICA
+================================= -->
+
+<audio
+    id="musica"
+    src="musica.mp3"
+    loop
+    preload="auto">
+</audio>
+
 
 <script>
 
-const canvas = document.getElementById("flores");
-const ctx = canvas.getContext("2d");
 
-let ancho;
-let alto;
+/* ==========================================
+   CANVAS
+========================================== */
 
-function ajustarCanvas() {
+const canvas =
+    document.getElementById("canvas");
 
-    ancho = canvas.width = window.innerWidth;
-    alto = canvas.height = window.innerHeight;
+const ctx =
+    canvas.getContext("2d");
+
+
+let W = 0;
+let H = 0;
+let DPR = 1;
+
+
+function resize(){
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    W =
+        window.innerWidth;
+
+    H =
+        window.innerHeight;
+
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+
+    canvas.style.width =
+        W + "px";
+
+    canvas.style.height =
+        H + "px";
+
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
 
 }
 
-ajustarCanvas();
 
-window.addEventListener("resize", ajustarCanvas);
+resize();
+
+window.addEventListener(
+    "resize",
+    resize
+);
 
 
-/* =====================================
-   FLORES
-===================================== */
+/* ==========================================
+   CONFIGURACIÓN DE FLORES
+========================================== */
+
+
+/*
+    x = posición horizontal
+    base = altura desde abajo
+    size = tamaño
+    delay = momento en que empieza
+*/
 
 const flores = [
 
     {
-        x: 0.50,
-        y: 0.42,
-        tamaño: 1.15,
-        retraso: 0
+        x:.50,
+        base:.92,
+        size:1.15,
+        delay:0
     },
 
     {
-        x: 0.42,
-        y: 0.50,
-        tamaño: 0.95,
-        retraso: 400
+        x:.40,
+        base:.94,
+        size:1.00,
+        delay:550
     },
 
     {
-        x: 0.58,
-        y: 0.48,
-        tamaño: 1.00,
-        retraso: 700
+        x:.60,
+        base:.94,
+        size:1.02,
+        delay:900
     },
 
     {
-        x: 0.35,
-        y: 0.58,
-        tamaño: 0.85,
-        retraso: 1000
+        x:.32,
+        base:.96,
+        size:.88,
+        delay:1350
     },
 
     {
-        x: 0.65,
-        y: 0.57,
-        tamaño: 0.90,
-        retraso: 1300
+        x:.68,
+        base:.96,
+        size:.90,
+        delay:1700
     },
 
     {
-        x: 0.50,
-        y: 0.32,
-        tamaño: 0.90,
-        retraso: 1600
+        x:.46,
+        base:.95,
+        size:.82,
+        delay:2200
+    },
+
+    {
+        x:.55,
+        base:.95,
+        size:.85,
+        delay:2600
     }
 
 ];
 
 
-/* =====================================
-   DIBUJAR UNA FLOR
-===================================== */
+/* ==========================================
+   PARTÍCULAS
+========================================== */
 
-function dibujarFlor(flor, tiempo) {
+const particulas = [];
 
-    const x = flor.x * ancho;
-    const y = flor.y * alto;
+
+for(let i=0;i<45;i++){
+
+    particulas.push({
+
+        x:Math.random(),
+
+        y:Math.random(),
+
+        size:
+            1.5 +
+            Math.random()*3,
+
+        speed:
+            .00005 +
+            Math.random()*.00008,
+
+        phase:
+            Math.random()*Math.PI*2
+
+    });
+
+}
+
+
+/* ==========================================
+   DIBUJAR TALLO
+========================================== */
+
+function dibujarTallo(
+    flor,
+    crecimiento,
+    tiempo
+){
+
+    const x =
+        flor.x * W;
+
+    const base =
+        flor.base * H;
+
+
+    const altura =
+        Math.min(
+            H * .55,
+            330 * flor.size
+        );
+
+
+    const alturaActual =
+        altura * crecimiento;
+
 
     /*
-       Animación de crecimiento
+       Movimiento por viento
     */
 
-    let crecimiento =
-        (tiempo - flor.retraso) / 1800;
+    const viento =
+        Math.sin(
+            tiempo * .0015 +
+            flor.x * 10
+        ) * 8 * crecimiento;
 
-    if (crecimiento < 0)
-        crecimiento = 0;
 
-    if (crecimiento > 1)
-        crecimiento = 1;
+    ctx.save();
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        x,
+        base
+    );
 
 
     /*
-       Suavizado
+       Curva del tallo
     */
 
-    crecimiento =
-        1 - Math.pow(1 - crecimiento, 3);
+    ctx.bezierCurveTo(
+
+        x - 10 + viento,
+        base - alturaActual*.30,
+
+        x + 15 + viento,
+        base - alturaActual*.70,
+
+        x + viento,
+        base - alturaActual
+
+    );
 
 
-    const escala =
-        crecimiento * flor.tamaño;
+    ctx.strokeStyle =
+        "#24783b";
+
+
+    ctx.lineWidth =
+        Math.max(
+            3,
+            7 * flor.size
+        );
+
+
+    ctx.lineCap =
+        "round";
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    return {
+
+        x:x + viento,
+
+        y:
+            base -
+            alturaActual,
+
+        altura:alturaActual,
+
+        viento:viento
+
+    };
+
+}
+
+
+/* ==========================================
+   DIBUJAR HOJA
+========================================== */
+
+function dibujarHoja(
+    x,
+    y,
+    lado,
+    tamaño,
+    apertura
+){
+
+    ctx.save();
+
+    ctx.translate(
+        x,
+        y
+    );
+
+
+    const angulo =
+        lado *
+        .45;
+
+
+    ctx.rotate(angulo);
+
+
+    ctx.fillStyle =
+        "#48a94b";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(0,0);
+
+
+    ctx.bezierCurveTo(
+
+        lado * tamaño*.55,
+        -tamaño*.30,
+
+        lado * tamaño,
+        -tamaño*.05,
+
+        lado * tamaño*1.15,
+        0
+
+    );
+
+
+    ctx.bezierCurveTo(
+
+        lado * tamaño*.65,
+        tamaño*.25,
+
+        lado * tamaño*.25,
+        tamaño*.22,
+
+        0,
+        0
+
+    );
+
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+       Nervadura
+    */
+
+    ctx.strokeStyle =
+        "rgba(30,110,45,.55)";
+
+    ctx.lineWidth=1.3;
+
+    ctx.beginPath();
+
+    ctx.moveTo(0,0);
+
+    ctx.lineTo(
+        lado*tamaño,
+        0
+    );
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* ==========================================
+   DIBUJAR FLOR
+========================================== */
+
+function dibujarFlor(
+    x,
+    y,
+    tamaño,
+    apertura,
+    tiempo,
+    semilla
+){
+
+    ctx.save();
 
 
     /*
@@ -139,25 +659,18 @@ function dibujarFlor(flor, tiempo) {
     */
 
     const movimiento =
-        Math.sin(tiempo * 0.0015 + flor.x * 10)
-        * 7;
+        Math.sin(
+            tiempo*.0014 +
+            semilla
+        ) * 9;
 
 
-    /*
-       Movimiento de inclinación
-    */
+    const rotacion =
+        Math.sin(
+            tiempo*.0011 +
+            semilla
+        ) * .08;
 
-    const inclinacion =
-        Math.sin(tiempo * 0.0012 + flor.y * 8)
-        * 0.08;
-
-
-    ctx.save();
-
-
-    /*
-       Posición
-    */
 
     ctx.translate(
         x + movimiento,
@@ -165,87 +678,27 @@ function dibujarFlor(flor, tiempo) {
     );
 
 
-    ctx.rotate(inclinacion);
-
-
-    /*
-       TALLO
-    */
-
-    ctx.strokeStyle = "#318b39";
-
-    ctx.lineWidth = 6 * escala;
-
-    ctx.lineCap = "round";
-
-    ctx.beginPath();
-
-    ctx.moveTo(0, 0);
-
-    ctx.quadraticCurveTo(
-        -8 * escala,
-        70 * escala,
-        5 * escala,
-        180 * escala
-    );
-
-    ctx.stroke();
-
-
-    /*
-       HOJA IZQUIERDA
-    */
-
-    ctx.fillStyle = "#39983f";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        -20 * escala,
-        105 * escala,
-        35 * escala,
-        12 * escala,
-        -0.5,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
-
-
-    /*
-       HOJA DERECHA
-    */
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        20 * escala,
-        140 * escala,
-        35 * escala,
-        12 * escala,
-        0.5,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fill();
+    ctx.rotate(rotacion);
 
 
     /*
        PÉTALOS
     */
 
-    const cantidadPetalos = 18;
+    const petalos = 24;
 
-    for (
-        let i = 0;
-        i < cantidadPetalos;
+
+    for(
+        let i=0;
+        i<petalos;
         i++
-    ) {
+    ){
 
         const angulo =
-            (Math.PI * 2 / cantidadPetalos) * i;
+            i *
+            Math.PI*2 /
+            petalos;
+
 
         ctx.save();
 
@@ -253,24 +706,89 @@ function dibujarFlor(flor, tiempo) {
 
 
         /*
+           Apertura progresiva
+        */
+
+        const distancia =
+            15 +
+            31 * apertura;
+
+
+        ctx.translate(
+            0,
+            -distancia
+        );
+
+
+        /*
            Pétalo
         */
 
-        ctx.fillStyle = "#FFD800";
+        const ancho =
+            12 * tamaño;
+
+        const largo =
+            27 * tamaño *
+            apertura;
+
+
+        ctx.fillStyle =
+            i % 3 === 0
+                ? "#ffe43b"
+                : "#ffd21c";
+
 
         ctx.beginPath();
 
+
         ctx.ellipse(
-            0,
-            -42 * escala,
-            17 * escala,
-            34 * escala,
+
             0,
             0,
-            Math.PI * 2
+
+            ancho,
+
+            largo,
+
+            0,
+            0,
+            Math.PI*2
+
         );
 
+
         ctx.fill();
+
+
+        /*
+           brillo del pétalo
+        */
+
+        ctx.fillStyle =
+            "rgba(255,248,120,.45)";
+
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+
+            -2,
+            -7,
+
+            ancho*.38,
+
+            largo*.35,
+
+            -.2,
+            0,
+            Math.PI*2
+
+        );
+
+
+        ctx.fill();
+
 
         ctx.restore();
 
@@ -278,19 +796,27 @@ function dibujarFlor(flor, tiempo) {
 
 
     /*
-       CENTRO DE LA FLOR
+       CENTRO
     */
 
-    ctx.fillStyle = "#5a3508";
+    const radio =
+        18 *
+        tamaño *
+        apertura;
+
+
+    ctx.fillStyle =
+        "#71400b";
+
 
     ctx.beginPath();
 
     ctx.arc(
         0,
         0,
-        28 * escala,
+        radio,
         0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.fill();
@@ -300,28 +826,42 @@ function dibujarFlor(flor, tiempo) {
        Semillas del centro
     */
 
-    ctx.fillStyle = "#8b5a12";
+    ctx.fillStyle =
+        "#b07818";
 
-    for (
-        let i = 0;
-        i < 35;
+
+    for(
+        let i=0;
+        i<35;
         i++
-    ) {
+    ){
 
         const angulo =
-            Math.random() * Math.PI * 2;
+            (i * 2.399) +
+            semilla;
 
-        const radio =
-            Math.random() * 21 * escala;
+
+        const r =
+            radio *
+            (.2 +
+            ((i*17)%100)/100*.65);
+
+
+        const px =
+            Math.cos(angulo)*r;
+
+        const py =
+            Math.sin(angulo)*r;
+
 
         ctx.beginPath();
 
         ctx.arc(
-            Math.cos(angulo) * radio,
-            Math.sin(angulo) * radio,
-            2 * escala,
+            px,
+            py,
+            1.5*tamaño,
             0,
-            Math.PI * 2
+            Math.PI*2
         );
 
         ctx.fill();
@@ -334,78 +874,356 @@ function dibujarFlor(flor, tiempo) {
 }
 
 
-/* =====================================
+/* ==========================================
+   DIBUJAR UNA FLOR COMPLETA
+========================================== */
+
+function dibujarRamoFlor(
+    flor,
+    tiempo
+){
+
+    /*
+       Tiempo desde que empieza
+    */
+
+    let t =
+        (tiempo - flor.delay)
+        / 2600;
+
+
+    if(t < 0)
+        return;
+
+
+    if(t > 1)
+        t = 1;
+
+
+    /*
+       Suavizado
+    */
+
+    const crecimiento =
+        1 -
+        Math.pow(
+            1-t,
+            3
+        );
+
+
+    /*
+       Crecimiento del tallo
+    */
+
+    const tallo =
+        dibujarTallo(
+            flor,
+            crecimiento,
+            tiempo
+        );
+
+
+    /*
+       Las hojas aparecen después
+       de que crece parte del tallo
+    */
+
+    if(
+        crecimiento > .35
+    ){
+
+        const cantidadHojas =
+            Math.floor(
+                crecimiento * 4
+            );
+
+
+        for(
+            let i=0;
+            i<cantidadHojas;
+            i++
+        ){
+
+            const posicion =
+                .38 +
+                i*.13;
+
+
+            const hx =
+                tallo.x;
+
+
+            const hy =
+                flor.base*H -
+                tallo.altura *
+                posicion;
+
+
+            const lado =
+                i%2===0
+                    ? -1
+                    : 1;
+
+
+            const aparicion =
+                Math.min(
+                    1,
+                    (crecimiento-.35)*3
+                );
+
+
+            dibujarHoja(
+
+                hx,
+
+                hy,
+
+                lado,
+
+                30 *
+                flor.size *
+                aparicion,
+
+                aparicion
+
+            );
+
+        }
+
+    }
+
+
+    /*
+       Flor aparece al final
+    */
+
+    if(
+        crecimiento > .60
+    ){
+
+        let apertura =
+            (crecimiento-.60)/.40;
+
+
+        apertura =
+            1 -
+            Math.pow(
+                1-apertura,
+                3
+            );
+
+
+        dibujarFlor(
+
+            tallo.x,
+
+            tallo.y,
+
+            flor.size,
+
+            apertura,
+
+            tiempo,
+
+            flor.x*20
+
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   PARTICULAS / PÉTALOS FLOTANDO
+========================================== */
+
+function dibujarParticulas(
+    tiempo
+){
+
+    particulas.forEach(
+        p => {
+
+            const x =
+                p.x*W +
+                Math.sin(
+                    tiempo*.001 +
+                    p.phase
+                )*20;
+
+
+            const y =
+                ((p.y +
+                tiempo*p.speed)
+                % 1)*H;
+
+
+            ctx.fillStyle =
+                "rgba(255,239,83,.65)";
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                p.size,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+        }
+    );
+
+}
+
+
+/* ==========================================
    ANIMACIÓN
-===================================== */
+========================================== */
 
 const inicio =
     performance.now();
 
 
-function animar(tiempo) {
+function animar(ahora){
+
+    const tiempo =
+        ahora -
+        inicio;
+
 
     /*
        Fondo
     */
 
-    const degradado =
+    const fondo =
         ctx.createLinearGradient(
             0,
             0,
             0,
-            alto
+            H
         );
 
-    degradado.addColorStop(
+
+    fondo.addColorStop(
         0,
-        "#267e74"
+        "#63c8b3"
     );
 
-    degradado.addColorStop(
-        1,
-        "#155f59"
+
+    fondo.addColorStop(
+        .55,
+        "#38a99a"
     );
+
+
+    fondo.addColorStop(
+        1,
+        "#237d73"
+    );
+
 
     ctx.fillStyle =
-        degradado;
+        fondo;
+
 
     ctx.fillRect(
         0,
         0,
-        ancho,
-        alto
+        W,
+        H
     );
 
 
     /*
-       Dibujar flores
+       Partículas
+    */
+
+    dibujarParticulas(
+        tiempo
+    );
+
+
+    /*
+       Flores
     */
 
     flores.forEach(
         flor => {
 
-            dibujarFlor(
+            dibujarRamoFlor(
                 flor,
-                tiempo - inicio
+                tiempo
             );
 
         }
     );
 
 
-    /*
-       Siguiente cuadro
-    */
-
-    requestAnimationFrame(animar);
+    requestAnimationFrame(
+        animar
+    );
 
 }
 
 
-requestAnimationFrame(animar);
+requestAnimationFrame(
+    animar
+);
+
+
+/* ==========================================
+   MÚSICA
+========================================== */
+
+const boton =
+    document.getElementById(
+        "comenzar"
+    );
+
+const pantalla =
+    document.getElementById(
+        "inicio"
+    );
+
+const musica =
+    document.getElementById(
+        "musica"
+    );
+
+
+boton.addEventListener(
+    "click",
+    async () => {
+
+        try{
+
+            musica.volume = .65;
+
+            await musica.play();
+
+        }catch(e){
+
+            console.log(
+                "No se pudo reproducir la música"
+            );
+
+        }
+
+
+        pantalla.classList.add(
+            "oculto"
+        );
+
+    }
+);
 
 </script>
 
 </body>
-</html> Auto detect text files and perform LF normalization
-* text=auto
+</html>
